@@ -7,8 +7,8 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_intro"
+    <androidx.viewpager.widget.ViewPager
+        android:id="@+id/vp_intro"
         android:layout_width="match_parent"
         android:layout_height="550dp" />
 
@@ -56,6 +56,4 @@
                 app:cornerRadius="20dp" />
         </LinearLayout>
     </FrameLayout>
-
-
 </LinearLayout>

@@ -7,16 +7,18 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.introexamplewithrecyclerkotlin.MainAdapter
-import com.example.introexamplewithrecyclerkotlin.Page
+import androidx.viewpager.widget.PagerAdapter
+import androidx.viewpager.widget.ViewPager
+import com.example.intropagekotlin.Page
+import com.example.intropagekotlin.PageAdapter
+import com.google.android.material.tabs.TabLayout
+import java.util.ArrayList
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var adapter: MainAdapter
     private lateinit var pages: ArrayList<Page>
+    private lateinit var viewPager: ViewPager
     private lateinit var tv_skip: TextView
     private lateinit var btn_start: Button
-    private lateinit var gridLayoutManager: GridLayoutManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,42 +27,51 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initViews() {
-        recyclerView = findViewById(R.id.rv_intro)
-        gridLayoutManager = object : GridLayoutManager(this, 1, HORIZONTAL, false) {
-            override fun canScrollHorizontally(): Boolean {
-                return true
-            }
-        }
-        recyclerView.setLayoutManager(gridLayoutManager)
+        viewPager = findViewById(R.id.vp_intro)
+        val tabLayout = findViewById<TabLayout>(R.id.tab_intro)
         tv_skip = findViewById(R.id.tv_skip)
         btn_start = findViewById(R.id.btn_start)
+
+
         pages = ArrayList()
         addPages()
         refreshAdapter()
+        tabLayout.setupWithViewPager(viewPager)
+
         controlPage()
     }
 
-    private fun controlPage() {
-        tv_skip.setOnClickListener { v: View? ->
-            if (gridLayoutManager.findLastCompletelyVisibleItemPosition() < adapter.itemCount - 1) {
-                gridLayoutManager.scrollToPosition(gridLayoutManager.findLastCompletelyVisibleItemPosition() + 1)
-            }
-        }
-        recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                super.onScrolled(recyclerView, dx, dy)
-                if (gridLayoutManager.findLastCompletelyVisibleItemPosition() == adapter.itemCount - 1) {
-                    btn_start.visibility = View.VISIBLE
-                } else {
-                    btn_start.visibility = View.GONE
-                }
-            }
-        })
+    private fun refreshAdapter() {
+        val pagerAdapter: PagerAdapter = PageAdapter(pages, this)
+        viewPager.adapter = pagerAdapter
     }
 
-    private fun refreshAdapter() {
-        adapter = MainAdapter(pages)
-        recyclerView.adapter = adapter
+    private fun controlButton(position: Int) {
+        if (position != 2) {
+            btn_start.visibility = View.GONE
+            tv_skip.visibility = View.VISIBLE
+        } else {
+            tv_skip.visibility = View.GONE
+            btn_start.visibility = View.VISIBLE
+        }
+    }
+
+    private fun controlPage() {
+        viewPager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
+            override fun onPageScrolled(
+                position: Int,
+                positionOffset: Float,
+                positionOffsetPixels: Int
+            ) {
+                controlButton(position)
+                tv_skip.setOnClickListener {
+                    viewPager.currentItem = position + 1
+                }
+            }
+
+            override fun onPageSelected(position: Int) {}
+            override fun onPageScrollStateChanged(state: Int) {}
+        })
     }
 
     private fun addPages() {
